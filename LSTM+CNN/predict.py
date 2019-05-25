@@ -15,7 +15,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--image_path', type=str, default = 'Data/cat.jpeg',
                        help='Image Path')
-	parser.add_argument('--model_path', type=str, default = 'Data/Models/model2.ckpt',
+	parser.add_argument('--model_path', type=str, default = 'Data/Models/model199.ckpt',
                        help='Model Path')
 	parser.add_argument('--num_lstm_layers', type=int, default=2,
                        help='num_lstm_layers')
