@@ -206,3 +206,6 @@ def load_fc7_features(data_dir, split):
 	with h5py.File( join( data_dir, (split + '_image_id_list.h5')),'r') as hf:
 		image_id_list = np.array(hf.get('image_id_list'))
 	return fc7_features, image_id_list
+
+if __name__ == '__main__':
+	prepare_training_data()   

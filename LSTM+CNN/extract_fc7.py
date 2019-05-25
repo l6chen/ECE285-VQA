@@ -41,7 +41,7 @@ def main():
 		print("Name", opn.name, list(opn.values()))
         
 	#Loading data
-	data_loader.prepare_training_data(version = 2, data_dir = 'Data')
+# 	data_loader.prepare_training_data(version = 2, data_dir = 'Data')
 	all_data = data_loader.load_questions_answers()
 	print(args)
 	if args.split == "train":
