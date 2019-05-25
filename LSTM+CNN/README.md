@@ -7,7 +7,7 @@ by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slight
 ![Model architecture](http://i.imgur.com/Jvixx2W.jpg)
 
 ## Requirements
-- Python 2.7.6
+- Python 3.6+
 - [Tensorflow][3]
 - [h5py][4]
 
