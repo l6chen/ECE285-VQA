@@ -37,56 +37,53 @@ def main():
 	
 
 	args = parser.parse_args()
-
-
+    #Extract vocabulary of question and answer
 	vocab_data = data_loader.get_question_answer_vocab(data_dir = args.data_dir)
-	qvocab = vocab_data['question_vocab']
+
+    #Build q_map but seems useless, ans_map useful
 	q_map = { vocab_data['question_vocab'][qw] : qw for qw in vocab_data['question_vocab']}
-	
+	ans_map = { vocab_data['answer_vocab'][ans] : ans for ans in vocab_data['answer_vocab']}
 	fc7_features = utils.extract_fc7_features(args.image_path, join(args.data_dir, 'vgg16.tfmodel'))
 	
-	model_options = {
-		'num_lstm_layers' : args.num_lstm_layers,
-		'rnn_size' : args.rnn_size,
-		'embedding_size' : args.embedding_size,
-		'word_emb_dropout' : args.word_emb_dropout,
-		'image_dropout' : args.image_dropout,
-		'fc7_feature_length' : args.fc7_feature_length,
-		'lstm_steps' : vocab_data['max_question_length'] + 1,
-		'q_vocab_size' : len(vocab_data['question_vocab']),
-		'ans_vocab_size' : len(vocab_data['answer_vocab'])
-	}
-	
+    #Word Splitting
 	question_vocab = vocab_data['question_vocab']
 	word_regex = re.compile(r'\w+')
-	question_ids = np.zeros((1, vocab_data['max_question_length']), dtype = 'int32')
 	question_words = re.findall(word_regex, args.question)
+    #Find question's word in ques_vocab,record it in ques_id
+	question_ids = np.zeros((1, vocab_data['max_question_length']), dtype = 'int32')
 	base = vocab_data['max_question_length'] - len(question_words)
 	for i in range(0, len(question_words)):
 		if question_words[i] in question_vocab:
 			question_ids[0][base + i] = question_vocab[ question_words[i] ]
 		else:
-			question_ids[0][base + i] = question_vocab['UNK']
+			question_ids[0][base + i] = question_vocab['UNK']#Biggest index in answer
 
-	ans_map = { vocab_data['answer_vocab'][ans] : ans for ans in vocab_data['answer_vocab']}
+	#preparing model
+	model_options = {
+        'num_lstm_layers' : args.num_lstm_layers,
+        'rnn_size' : args.rnn_size,
+        'embedding_size' : args.embedding_size,
+        'word_emb_dropout' : args.word_emb_dropout,
+        'image_dropout' : args.image_dropout,
+        'fc7_feature_length' : args.fc7_feature_length,
+        'lstm_steps' : vocab_data['max_question_length'] + 1,
+        'q_vocab_size' : len(vocab_data['question_vocab']),
+        'ans_vocab_size' : len(vocab_data['answer_vocab'])
+    }
+	#dont know what is doing
 	model = vis_lstm_model.Vis_lstm_model(model_options)
 	input_tensors, t_prediction, t_ans_probab = model.build_generator()
 	sess = tf.InteractiveSession()
 	saver = tf.train.Saver()
 	saver.restore(sess, args.model_path)
-	
+    #predict
 	pred, answer_probab = sess.run([t_prediction, t_ans_probab], feed_dict={
         input_tensors['fc7']:fc7_features,
         input_tensors['sentence']:question_ids,
     })
 
+    #showing image/question/answer
 	print("Image:", args.image_path)
-# 	img_pre = mpimg.imread(args.image_path)
-# 	plt.imshow(img_pre)
-# 	plt.show()
-# 	pylab.show()
-
-
 	print("Question:", args.question)
 	print("Ans:", ans_map[pred[0]])
 	answer_probab_tuples = [(-answer_probab[0][idx], idx) for idx in range(len(answer_probab[0]))]
