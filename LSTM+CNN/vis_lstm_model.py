@@ -18,6 +18,7 @@ class Vis_lstm_model:
 			self.bimg = self.init_bias(options['embedding_size'], name = 'bimg')
 			
 			# TODO: Assumed embedding size and rnn-size to be same
+			# 应该是指的RNN里面的W,U,B三个参数
 			self.lstm_W = []
 			self.lstm_U = []
 			self.lstm_b = []
@@ -32,7 +33,7 @@ class Vis_lstm_model:
 			self.ans_sm_W = self.init_weight(options['rnn_size'], options['ans_vocab_size'], name = 'ans_sm_W')
 			self.ans_sm_b = self.init_bias(options['ans_vocab_size'], name = 'ans_sm_b')
 
-	def forward_pass_lstm(self, word_embeddings):
+	def forward_pass_lstm(self, word_embeddings):# This part just do the forward propagation of the RNN Network
 		x = word_embeddings
 		output = None
 		for l in range(self.options['num_lstm_layers']):
@@ -41,10 +42,12 @@ class Vis_lstm_model:
 			layer_output = []
 			for lstm_step in range(self.options['lstm_steps']):
 				if lstm_step == 0:
-					lstm_preactive = tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l]
+					lstm_preactive = tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l] #Composed the RNN linear function
 				else:
 					lstm_preactive = tf.matmul(h[lstm_step-1], self.lstm_U[l]) + tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l]
-				i, f, o, new_c = tf.split(lstm_preactive, num_or_size_splits = 4, axis = 1)
+				
+				#把tensor -> sub-tensor：https://www.tensorflow.org/api_docs/python/tf/split
+				i, f, o, new_c = tf.split(lstm_preactive, num_or_size_splits = 4, axis = 1) 
 				i = tf.nn.sigmoid(i)
 				f = tf.nn.sigmoid(f)
 				o = tf.nn.sigmoid(o)
@@ -67,32 +70,42 @@ class Vis_lstm_model:
 
 
 
-
-	def build_model(self):
+	"""
+	This function basically use the forward propagation to implement the models using the paramter got before
+	and predict the result. Finally calculate the accurancy and loss 
+	"""
+	def build_model(self): 
 		fc7_features = tf.placeholder('float32',[ None, self.options['fc7_feature_length'] ], name = 'fc7')
 		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
 		answer = tf.placeholder('float32', [None, self.options['ans_vocab_size']], name = "answer")
 
 
-		word_embeddings = []
+		word_embeddings = []   #对数据进行处理，作用是得到离散对象（单词）到实数向量的映射
 		for i in range(self.options['lstm_steps']-1):
 			word_emb = tf.nn.embedding_lookup(self.Wemb, sentence[:,i])
 			word_emb = tf.nn.dropout(word_emb, self.options['word_emb_dropout'], name = "word_emb" + str(i))
 			word_embeddings.append(word_emb)
 
-		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg
-		image_embedding = tf.nn.tanh(image_embedding)
+		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg # 矩阵相乘+bias
+		image_embedding = tf.nn.tanh(image_embedding) 
 		image_embedding = tf.nn.dropout(image_embedding, self.options['image_dropout'], name = "vis_features")
 
 		# Image as the last word in the lstm
+		# 把image_embedding存到了word_embeddings的最后，应该是将文字和图像都变成了数字的矩阵实体
 		word_embeddings.append(image_embedding)
+	
+		#下面这个调用了上面的forward_pass_lstm函数
 		lstm_output = self.forward_pass_lstm(word_embeddings)
-		lstm_answer = lstm_output[-1]
+		lstm_answer = lstm_output[-1] # Get the answer from the output of Network, should use it for the error 
 		logits = tf.matmul(lstm_answer, self.ans_sm_W) + self.ans_sm_b
 		# ce = tf.nn.softmax_cross_entropy_with_logits(logits, answer, name = 'ce')
-		ce = tf.nn.softmax_cross_entropy_with_logits(labels=answer, logits= logits, name = 'ce')
+		
+		# Function Below will be abandoned in the future version, may have bugs here in the future. --- 5/25/2019 updated
+ 		ce = tf.nn.softmax_cross_entropy_with_logits(labels=answer, logits= logits, name = 'ce')
 		answer_probab = tf.nn.softmax(logits, name='answer_probab')
 		
+		# This part gets the predited label and ground truth label, compare them and get accurancy
+		# Reference: https://www.w3cschool.cn/tensorflow_python/tensorflow_python-vj8528sp.html
 		predictions = tf.argmax(answer_probab,1)
 		correct_predictions = tf.equal(tf.argmax(answer_probab,1), tf.argmax(answer,1))
 		accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
@@ -105,6 +118,7 @@ class Vis_lstm_model:
 		}
 		return input_tensors, loss, accuracy, predictions
 
+	
 	def build_generator(self):
 		fc7_features = tf.placeholder('float32',[ None, self.options['fc7_feature_length'] ], name = 'fc7')
 		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
