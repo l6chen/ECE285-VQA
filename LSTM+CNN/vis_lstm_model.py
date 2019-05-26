@@ -147,4 +147,3 @@ class Vis_lstm_model:
 
 		return input_tensors, predictions, answer_probab
 
-
