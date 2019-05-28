@@ -18,7 +18,7 @@ class Vis_lstm_model:
 			self.bimg = self.init_bias(options['embedding_size'], name = 'bimg')
 			
 			# TODO: Assumed embedding size and rnn-size to be same
-			# 应该是指的RNN里面的W,U,B三个参数
+			# W,U,B paras in RNN
 			self.lstm_W = []
 			self.lstm_U = []
 			self.lstm_b = []
@@ -80,7 +80,7 @@ class Vis_lstm_model:
 		answer = tf.placeholder('float32', [None, self.options['ans_vocab_size']], name = "answer")
 
 
-		word_embeddings = []   #对数据进行处理，作用是得到离散对象（单词）到实数向量的映射
+		word_embeddings = []   #map discrete word to real number
 		for i in range(self.options['lstm_steps']-1):
 			word_emb = tf.nn.embedding_lookup(self.Wemb, sentence[:,i])
 			word_emb = tf.nn.dropout(word_emb, self.options['word_emb_dropout'], name = "word_emb" + str(i))
@@ -91,10 +91,10 @@ class Vis_lstm_model:
 		image_embedding = tf.nn.dropout(image_embedding, self.options['image_dropout'], name = "vis_features")
 
 		# Image as the last word in the lstm
-		# 把image_embedding存到了word_embeddings的最后，应该是将文字和图像都变成了数字的矩阵实体
+		# 
 		word_embeddings.append(image_embedding)
 	
-		#下面这个调用了上面的forward_pass_lstm函数
+		#call forward_pass_lstm
 		lstm_output = self.forward_pass_lstm(word_embeddings)
 		lstm_answer = lstm_output[-1] # Get the answer from the output of Network, should use it for the error 
 		logits = tf.matmul(lstm_answer, self.ans_sm_W) + self.ans_sm_b
