@@ -70,11 +70,12 @@ class Vis_lstm_model:
 
 
 
-	"""
-	This function basically use the forward propagation to implement the models using the paramter got before
-	and predict the result. Finally calculate the accurancy and loss 
-	"""
+	
 	def build_model(self): 
+		"""
+		This function basically use the forward propagation to implement the models using the paramter got before
+		and predict the result. Finally calculate the accurancy and loss 
+		"""
 		fc7_features = tf.placeholder('float32',[ None, self.options['fc7_feature_length'] ], name = 'fc7')
 		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
 		answer = tf.placeholder('float32', [None, self.options['ans_vocab_size']], name = "answer")
@@ -86,7 +87,7 @@ class Vis_lstm_model:
 			word_emb = tf.nn.dropout(word_emb, self.options['word_emb_dropout'], name = "word_emb" + str(i))
 			word_embeddings.append(word_emb)
 
-		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg # 矩阵相乘+bias
+		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg # Wx+bias
 		image_embedding = tf.nn.tanh(image_embedding) 
 		image_embedding = tf.nn.dropout(image_embedding, self.options['image_dropout'], name = "vis_features")
 
