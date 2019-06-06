@@ -2,7 +2,7 @@
 
 
 This is a Tensorflow implementation of the VIS + LSTM visual question answering model from the paper [Exploring Models and Data for Image Question Answering][1]
-by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slightly from the original - the image embedding is plugged into the last lstm step (after the question) instead of the first. The LSTM model uses the same hyperparameters as those in the [Torch implementation of neural-VQA][2]. 
+by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slightly from the original - the image embedding is plugged into the last lstm step (after the question) instead of the first. This VIS+LSTM model is based on the github [Torch implementation of neural-VQA with Lua][2]. 
 ![Model architecture](http://i.imgur.com/Jvixx2W.jpg)
 
 ## Requirements
@@ -12,8 +12,8 @@ by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slight
 
 
 #### Datasets
-- Download the [MSCOCO][5] train+val images and [VQA][6] data using `Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
-- Download the [pretrained VGG-16 tensorflow model][7] and save it in the `Data` folder.
+- Download the [VQA][5] train+val images, questions and answers using `Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
+- Download the [pretrained VGG-16 tensorflow model][6] using `Data/download_models.sh`.
 
 ## Usage
 
@@ -44,43 +44,25 @@ python extract_fc7.py --split=val
   * run `python evaluate.py` with the same options as that in train.py, if not the defaults.
 
 ## Implementation Details
-- fc7 relu layer features from the pretrained VGG-16 model are used for image embeddings. I did not scale these features, and am not sure if that can make a difference.
+- fc7 relu layer features from the pretrained VGG-16 model are used for image embeddings. I have not scaled these features yet, but will implement in the future.
 - Questions are zero padded for fixed length questions, so that batch training may be used. Questions are represented as word indices of a question word vocabulary built during pre processing.
 - Answers are mapped to 1000 word vocabulary, covering 87% answers across training and validation datasets.
 - The LSTM+VIS model is defined in vis_lstm.py. The input tensors for training are fc7 features, Questions(Word indices upto 22 words), Answers(one hot encoding vector of size 1000). The model depicted in the figure is implemented with 2 LSTM layers by default(num_layers in configurable).
 
 ## Results
-The model achieved an accuray of 50.8% on the validation dataset after 12 epochs of training across the entire training dataset.
+The model achieved an accuray of 55.2% on the validation dataset after 50 epochs of training across the entire training dataset.
 
-## Sample Predictions
-
-The fun part! Try it for yourself. Make sure you have tensorflow installed. Download the data files/trained model from [this link][9] and save them in the ```Data/``` directory. Also download the [pretrained VGG-16 model][7] and save it as ```Data/vgg16.tfmodel```. You can test for any sample image using:
-```
-python predict.py --image_path="Data/sample.jpg" --question="Which animal is this?" --model_path="Data/model2.ckpt"
-```
-| Image        | Question           | Top Answers (left to right)  |
-| ------------- |:-------------:| -----:|
-| ![](http://i.imgur.com/j4FiEaS.jpg)      | What color is the signal? | red, green, yellow|
-| ![](http://i.imgur.com/FUR7k0y.jpg)      | What animal is this? | giraffe, cow, horse|
-| ![](http://i.imgur.com/VrGUves.jpg)      | What animal is this? | cat, dog, giraffe|
-| ![](http://i.imgur.com/yk53y1Y.jpg)      | What color is the frisbee that is in the dog's mouth? | white, brown, red|
-| ![](http://i.imgur.com/yk53y1Y.jpg)      | What color is the frisbee that is upside down? | red, white, blue|
-| ![](http://i.imgur.com/ifcccpd.jpg)      | What are they playing with? | frisbee, soccer ball, soccer|
-| ![](http://i.imgur.com/VrjUbgH.jpg)      | What is in the standing person's hand? | bat, glove, ball|
-| ![](http://i.imgur.com/80foxDZ.jpg)      | What are they doing? | surfing, swimming, parasailing|
-| ![](http://i.imgur.com/7ZZi2Xp.jpg)      | What sport is this? | skateboarding, parasailing, surfing|
 
 ## References
 - [Exploring Models and Data for Image Question Answering][1]
-- [Torch implementation of VQA][2]
-- [Neural Caption Generator with Attention][8]
+- [Torch implementation of VQA with Lua][2]
+- [Stacked Attention Networks for Image Question Answering][7]
 
 [1]: http://arxiv.org/abs/1505.02074
 [2]: https://github.com/abhshkdz/neural-vqa/
 [3]: https://github.com/tensorflow/tensorflow
 [4]: http://www.h5py.org/
-[5]: http://mscoco.org/
-[6]: http://visualqa.org/
-[7]: https://github.com/ry/tensorflow-vgg16
-[8]: https://github.com/jazzsaxmafia/show_attend_and_tell.tensorflow
-[9]: https://drive.google.com/folderview?id=0B30fmeZ1slbBU1JSRHdiWkF4NUk&usp=sharing
+[5]: https://visualqa.org/download.html
+[6]: https://github.com/ry/tensorflow-vgg16
+[7]: https://arxiv.org/pdf/1511.02274.pdf
+
