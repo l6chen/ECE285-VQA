@@ -35,7 +35,7 @@ python extract_fc7.py --split=val
     - `embedding_size`: Size of word embeddings. Default is 512.
     - `learning_rate`: Learning rate. Default is 0.001.
     - `batch_size`: Batch size. Default is 200.
-    - `epochs`: Number of full passes through the training data. Default is 50.
+    - `epochs`: Number of full passes through the training data. Default is 200.
     - `img_dropout`:  Dropout for image embedding nn. Probability of dropping input. Default is 0.5.
     - `word_emb_dropout`: Dropout for word embeddings. Default is 0.5.
     - `data_dir`: Directory containing the data h5 files. Default is `Data/`.
