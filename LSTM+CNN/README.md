@@ -17,6 +17,10 @@ by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slight
 
 ## Usage
 
+- Question and Answers pre-processing:
+```
+python data_loader.py
+```
 - Extract the fc-7 image features using:
 ```
 python extract_fc7.py --split=train
