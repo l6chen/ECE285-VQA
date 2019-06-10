@@ -6,7 +6,7 @@ This is a visual question answering in tensorflow by team RONGZICHEN SONG compos
 *Rongzichen Song (A53284665)<br>*
 *Lingfeng Chen (A53270085)<br>*
 *Tianming Sun (A53267707)<br>*
-*Tianyi Wang (A53284665)<br>*
+*Tianyi Wang (A53274015)<br>*
 
 This project includes two models: VIS-LSTM and SAN-LSTM, as depicted with more details in the folder named by the models' names.
 
