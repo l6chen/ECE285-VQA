@@ -13,8 +13,8 @@ This project includes two models: VIS-LSTM and SAN-LSTM, as depicted with more d
 ## Requirements
 =======================
 - Python 3.6+
-- [Tensorflow 1.10+][3]
-- [h5py][4]
+- [Tensorflow 1.10+][1]
+- [h5py][2]
 ```
 Install them like this
 
@@ -27,4 +27,5 @@ $ pip install tensorflow
 Since we implemented two models, the detail will be illustrated in each folder's README file.
 
 
-
+[1]: https://github.com/tensorflow/tensorflow
+[2]: http://www.h5py.org/
