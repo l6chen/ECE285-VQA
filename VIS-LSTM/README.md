@@ -15,7 +15,7 @@ evaluate.py        -- codes for evaluation
 utils.py           -- codes for reading image file and extract image features
 vis_lstm_model.py  -- codes for vis_lstm model
 demo.ipynb         -- perform demo for prediction
-demo.ipynb         -- record training process
+train.ipynb         -- record training process
 ```
 
 ## Datasets
@@ -24,9 +24,14 @@ demo.ipynb         -- record training process
 
 ## Usage
 
+- Retrieve trained model:
+```
+1. Unzip model49.ckpt.zip and model49.ckpt.z01 in Data/Models. 
+```
+For macos system, refer to [this][5]
+
 - Preparation:
 ```
-1. Unzip model49.ckpt.zip and model49.ckpt.z01 in Data/Models. For macos system, refer to https://superuser.com/questions/365643/how-to-unzip-split-files-on-os-x
 2. Download pretrained VGG16 Network, using download link written in the download_models.sh file under Data/.
 3. Download train images of which the download links are written in the download_data.sh file under Data/.
 4. Download val images using download_test.sh, or upload your own test images.
@@ -82,4 +87,4 @@ The model achieved an accuray of 55.8% on the validation dataset after 50 epochs
 [2]: https://github.com/abhshkdz/neural-vqa/
 [3]: https://visualqa.org/download.html
 [4]: https://github.com/ry/tensorflow-vgg16
-
+[5]: https://superuser.com/questions/365643/how-to-unzip-split-files-on-os-x
