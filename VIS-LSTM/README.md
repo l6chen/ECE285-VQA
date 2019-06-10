@@ -14,7 +14,8 @@ predict.py         -- codes for predicting
 evaluate.py        -- codes for evaluation
 utils.py           -- codes for reading image file and extract image features
 vis_lstm_model.py  -- codes for vis_lstm model
-demo.ipynb         -- perform demo for training, predicting and evaluation
+demo.ipynb         -- perform demo for prediction
+demo.ipynb         -- record training process
 ```
 
 ## Datasets
