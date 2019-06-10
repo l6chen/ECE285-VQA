@@ -23,7 +23,7 @@ class Vis_lstm_model:
                                                         input_mode='linear_input',
                                                         direction=options['lstm_direc'] + 'directional',
                                                         dropout=0.5,
-                                                        seed=0,
+                                                        seed=0.5,
                                                         dtype=tf.float32,
                                                         kernel_initializer=None,
                                                         bias_initializer=None,
