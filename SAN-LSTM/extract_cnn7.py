@@ -24,7 +24,6 @@ def main():
 
 	# read pretrained vgg16 network
 	args = parser.parse_args()
-	#print(args.model_path)
 	vgg_file = open(args.model_path,'rb')
 	vgg16raw = vgg_file.read()
 	vgg_file.close()
@@ -43,7 +42,6 @@ def main():
 		print("[VGG16] Name", opn.name, list(opn.values()))
         
 	#Loading data
-# 	data_loader.prepare_training_data(version = 2, data_dir = 'Data')
 	all_data = data_loader.load_questions_answers()
 	print(args)
 	if args.split == "train":
