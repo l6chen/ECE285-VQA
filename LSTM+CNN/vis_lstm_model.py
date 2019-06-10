@@ -1,5 +1,6 @@
 import tensorflow as tf
 import math
+import numpy as np
 
 class Vis_lstm_model:
 	def init_weight(self, dim_in, dim_out, name=None, stddev=1.0):
@@ -12,101 +13,74 @@ class Vis_lstm_model:
 		with tf.device('/gpu:0'):
 			self.options = options
 
-			# +1 for zero padding
+			#Word and image embeddings parameters
 			self.Wemb = tf.Variable(tf.random_uniform([options['q_vocab_size'] + 1, options['embedding_size']], -1.0, 1.0), name = 'Wemb')
 			self.Wimg = self.init_weight(options['fc7_feature_length'], options['embedding_size'], name = 'Wimg')
 			self.bimg = self.init_bias(options['embedding_size'], name = 'bimg')
-			
-			# TODO: Assumed embedding size and rnn-size to be same
-			# W,U,B paras in RNN
-			self.lstm_W = []
-			self.lstm_U = []
-			self.lstm_b = []
-			for i in range(options['num_lstm_layers']):
-				W = self.init_weight(options['rnn_size'], 4 * options['rnn_size'], name = ('rnnw_' + str(i)))
-				U = self.init_weight(options['rnn_size'], 4 * options['rnn_size'], name = ('rnnu_' + str(i)))
-				b = self.init_bias(4 * options['rnn_size'], name = ('rnnb_' + str(i)))
-				self.lstm_W.append(W)
-				self.lstm_U.append(U)
-				self.lstm_b.append(b)
+			#Initialize lstm
+			self.lstm = tf.contrib.cudnn_rnn.CudnnLSTM(num_layers = options['num_lstm_layers'],
+                                                        num_units = options['rnn_size'],
+                                                        input_mode='linear_input',
+                                                        direction=options['lstm_direc'] + 'directional',
+                                                        dropout=0.5,
+                                                        seed=0,
+                                                        dtype=tf.float32,
+                                                        kernel_initializer=None,
+                                                        bias_initializer=None,
+                                                        name='lstm'
+                                                    ) 
 
+            
 			self.ans_sm_W = self.init_weight(options['rnn_size'], options['ans_vocab_size'], name = 'ans_sm_W')
 			self.ans_sm_b = self.init_bias(options['ans_vocab_size'], name = 'ans_sm_b')
 
-	def forward_pass_lstm(self, word_embeddings):# This part just do the forward propagation of the RNN Network
-		x = word_embeddings
-		output = None
-		for l in range(self.options['num_lstm_layers']):
-			h = [None for i in range(self.options['lstm_steps'])]
-			c = [None for i in range(self.options['lstm_steps'])]
-			layer_output = []
-			for lstm_step in range(self.options['lstm_steps']):
-				if lstm_step == 0:
-					lstm_preactive = tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l] #Composed the RNN linear function
-				else:
-					lstm_preactive = tf.matmul(h[lstm_step-1], self.lstm_U[l]) + tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l]
-				
-				#把tensor -> sub-tensor：https://www.tensorflow.org/api_docs/python/tf/split
-				i, f, o, new_c = tf.split(lstm_preactive, num_or_size_splits = 4, axis = 1) 
-				i = tf.nn.sigmoid(i)
-				f = tf.nn.sigmoid(f)
-				o = tf.nn.sigmoid(o)
-				new_c = tf.nn.tanh(new_c)
-				
-				if lstm_step == 0:
-					c[lstm_step] = i * new_c
-				else:
-					c[lstm_step] = f * c[lstm_step-1] + i * new_c
 
-				# BUG IN THE LSTM --> Haven't corrected this yet, Will have to retrain the model.
-				h[lstm_step] = o * tf.nn.tanh(c[lstm_step])
-				# h[lstm_step] = o * tf.nn.tanh(new_c)
-				layer_output.append(h[lstm_step])
+	def forward_pass_lstm(self, word_embeddings,is_training = True):
 
-			x = layer_output
-			output = layer_output
-
-		return output
+		x = tf.stack(word_embeddings,0)
+		if self.options['lstm_direc'] == 'bi':
+			single_cell = lambda: tf.contrib.cudnn_rnn.CudnnCompatibleLSTMCell(512, reuse=tf.get_variable_scope().reuse)
+			lstm_fw_cell = [single_cell() for _ in range(1)]
+			lstm_bw_cell = [single_cell() for _ in range(1)]
+			(outputs, output_state_fw,output_state_bw) = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(
+                                                                                                       lstm_fw_cell,
+                                                                                                       lstm_bw_cell,
+                                                                                                       x,
+                                                                                                       dtype=tf.float32,
+                                                                                                       time_major=True)
+			return outputs[:,:,:512]
+		elif self.options['lstm_direc'] == 'uni':
+			outputs = self.lstm(x,training = is_training)
+			return outputs[0]
 
 
 
-	
-	def build_model(self): 
-		"""
-		This function basically use the forward propagation to implement the models using the paramter got before
-		and predict the result. Finally calculate the accurancy and loss 
-		"""
-		fc7_features = tf.placeholder('float32',[ None, self.options['fc7_feature_length'] ], name = 'fc7')
-		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
+	def build_model(self):
+		fc7_features = tf.placeholder('float32',[None, self.options['fc7_feature_length'] ], name = 'fc7')
+		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")#is a matrix[ques,512]
 		answer = tf.placeholder('float32', [None, self.options['ans_vocab_size']], name = "answer")
 
 
-		word_embeddings = []   #map discrete word to real number
+		word_embeddings = []
 		for i in range(self.options['lstm_steps']-1):
 			word_emb = tf.nn.embedding_lookup(self.Wemb, sentence[:,i])
 			word_emb = tf.nn.dropout(word_emb, self.options['word_emb_dropout'], name = "word_emb" + str(i))
+			
 			word_embeddings.append(word_emb)
 
-		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg # Wx+bias
-		image_embedding = tf.nn.tanh(image_embedding) 
+		image_embedding = tf.matmul(fc7_features, self.Wimg) + self.bimg
+		image_embedding = tf.nn.tanh(image_embedding)
 		image_embedding = tf.nn.dropout(image_embedding, self.options['image_dropout'], name = "vis_features")
 
-		# Image as the last word in the lstm
-		# 
+		#Image as the last word in the lstm
 		word_embeddings.append(image_embedding)
-	
-		#call forward_pass_lstm
+		#Forward once and get the prediction
 		lstm_output = self.forward_pass_lstm(word_embeddings)
-		lstm_answer = lstm_output[-1] # Get the answer from the output of Network, should use it for the error 
+		lstm_answer = lstm_output[-1,:]
 		logits = tf.matmul(lstm_answer, self.ans_sm_W) + self.ans_sm_b
-		# ce = tf.nn.softmax_cross_entropy_with_logits(logits, answer, name = 'ce')
-		
-		# Function Below will be abandoned in the future version, may have bugs here in the future. --- 5/25/2019 updated
- 		ce = tf.nn.softmax_cross_entropy_with_logits(labels=answer, logits= logits, name = 'ce')
+		ce = tf.nn.softmax_cross_entropy_with_logits(labels=answer, logits= logits, name = 'ce')
 		answer_probab = tf.nn.softmax(logits, name='answer_probab')
 		
-		# This part gets the predited label and ground truth label, compare them and get accurancy
-		# Reference: https://www.w3cschool.cn/tensorflow_python/tensorflow_python-vj8528sp.html
 		predictions = tf.argmax(answer_probab,1)
 		correct_predictions = tf.equal(tf.argmax(answer_probab,1), tf.argmax(answer,1))
 		accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
@@ -118,8 +92,7 @@ class Vis_lstm_model:
 			'answer' : answer
 		}
 		return input_tensors, loss, accuracy, predictions
-
-	
+    
 	def build_generator(self):
 		fc7_features = tf.placeholder('float32',[ None, self.options['fc7_feature_length'] ], name = 'fc7')
 		sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
@@ -133,7 +106,7 @@ class Vis_lstm_model:
 		image_embedding = tf.nn.tanh(image_embedding)
 
 		word_embeddings.append(image_embedding)
-		lstm_output = self.forward_pass_lstm(word_embeddings)
+		lstm_output = self.forward_pass_lstm(word_embeddings,is_training = False)
 		lstm_answer = lstm_output[-1]
 		logits = tf.matmul(lstm_answer, self.ans_sm_W) + self.ans_sm_b
 		
@@ -147,4 +120,3 @@ class Vis_lstm_model:
 		}
 
 		return input_tensors, predictions, answer_probab
-

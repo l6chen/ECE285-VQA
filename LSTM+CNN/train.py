@@ -4,6 +4,7 @@ import data_loader
 import argparse
 import numpy as np
 
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--num_lstm_layers', type=int, default=2,
@@ -22,9 +23,9 @@ def main():
                        help='Data directory')
 	parser.add_argument('--batch_size', type=int, default=200,
                        help='Batch Size')
-	parser.add_argument('--learning_rate', type=float, default=0.001,
+	parser.add_argument('--learning_rate', type=float, default=0.0002,
                        help='Batch Size')
-	parser.add_argument('--epochs', type=int, default=200,
+	parser.add_argument('--epochs', type=int, default=50,
                        help='Expochs')
 	parser.add_argument('--debug', type=bool, default=False,
                        help='Debug')
@@ -32,6 +33,8 @@ def main():
                        help='Trained Model Path')
 	parser.add_argument('--version', type=int, default=2,
                        help='VQA data version')
+	parser.add_argument('--lstm_direc', type=str, default='uni',
+                       help='LSTM Direction')
 
 	args = parser.parse_args()
 	print("Reading QA DATA")
@@ -47,7 +50,7 @@ def main():
 		image_id_map[ image_id_list[i] ] = i
 
 	ans_map = { qa_data['answer_vocab'][ans] : ans for ans in qa_data['answer_vocab']}
-
+	print(len(qa_data['question_vocab']))
 	model_options = {
 		'num_lstm_layers' : args.num_lstm_layers,
 		'rnn_size' : args.rnn_size,
@@ -57,24 +60,28 @@ def main():
 		'fc7_feature_length' : args.fc7_feature_length,
 		'lstm_steps' : qa_data['max_question_length'] + 1,
 		'q_vocab_size' : len(qa_data['question_vocab']),
-		'ans_vocab_size' : len(qa_data['answer_vocab'])
+		'ans_vocab_size' : len(qa_data['answer_vocab']),
+		'lstm_direc' : args.lstm_direc
 	}
 	
 	
-	
+
 	model = vis_lstm_model.Vis_lstm_model(model_options)
 	input_tensors, t_loss, t_accuracy, t_p = model.build_model()
 	train_op = tf.train.AdamOptimizer(args.learning_rate).minimize(t_loss)
 	sess = tf.InteractiveSession()
-	tf.initialize_all_variables().run()
+	sess.run(tf.global_variables_initializer())
 
 	saver = tf.train.Saver()
 	if args.resume_model:
 		saver.restore(sess, args.resume_model)
+		last_epoch = int(args.resume_model[-7:-5])
+		print(f'I resume Epoch {last_epoch}')
+	else:
+		last_epoch = int(-1)
 
 	for i in range(args.epochs):
 		batch_no = 0
-
 		while (batch_no*args.batch_size) < len(qa_data['training']):
 			sentence, answer, fc7 = get_training_batch(batch_no, args.batch_size, fc7_features, image_id_map, qa_data, 'train')
 			_, loss_value, accuracy, pred = sess.run([train_op, t_loss, t_accuracy, t_p], 
@@ -84,19 +91,21 @@ def main():
 					input_tensors['answer']:answer
 				}
 			)
+			
 			batch_no += 1
 			if args.debug:
 				for idx, p in enumerate(pred):
 					print(ans_map[p], ans_map[ np.argmax(answer[idx])])
 
-				print("Loss", loss_value, batch_no, i)
+				print("Loss", loss_value, batch_no, i + 1 + last_epoch)
 				print("Accuracy", accuracy)
 				print("---------------")
 			else:
-				print("Loss", loss_value, batch_no, i)
+				print("Loss", loss_value, batch_no, i + 1 + last_epoch)
 				print("Training Accuracy", accuracy)
 			
-		save_path = saver.save(sess, "Data/Models/model{}.ckpt".format(i))
+		save_path = saver.save(sess, "Data/Models/model{}.ckpt".format(i + 1 + last_epoch))
+
 
 def get_training_batch(batch_no, batch_size, fc7_features, image_id_map, qa_data, split):
 	qa = None
@@ -121,6 +130,8 @@ def get_training_batch(batch_no, batch_size, fc7_features, image_id_map, qa_data
 		count += 1
 	
 	return sentence, answer, fc7
+
+
 
 if __name__ == '__main__':   
 	main()

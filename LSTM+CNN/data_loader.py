@@ -26,8 +26,8 @@ def prepare_training_data(version = 2, data_dir = 'Data'):
 
 	# IF ALREADY EXTRACTED
 	# qa_data_file = join(data_dir, 'qa_data_file{}.pkl'.format(version))
-	if isfile(qa_data_file):
-		return
+# 	if isfile(qa_data_file):
+# 		return
 # 		with open(qa_data_file) as f:
 # 			data = pickle.load(f)
 # 			return data
@@ -53,8 +53,9 @@ def prepare_training_data(version = 2, data_dir = 'Data'):
 	print("Qu", len(t_questions['questions']), len(v_questions['questions']))
 
 	answers = t_answers['annotations'] + v_answers['annotations']
-	questions = t_questions['questions'] + v_questions['questions']
-	
+	questions = t_questions['questions'] + v_questions['questions']#60000 training ques,30000 val ques
+   
+	#print(questions[0]) questions:[{'ques','imgid','quesid'}]
 	answer_vocab = make_answer_vocab(answers)
 	question_vocab, max_question_length = make_questions_vocab(questions, answers, answer_vocab)
 	print("Max Question Length", max_question_length)
@@ -145,6 +146,7 @@ def make_answer_vocab(answers):
 
 	answer_frequency_tuples = [ (-frequency, answer) for answer, frequency in answer_frequency.items()]
 	answer_frequency_tuples.sort()
+	print(len(answer_frequency_tuples))
 	answer_frequency_tuples = answer_frequency_tuples[0:top_n-1]
 
 	answer_vocab = {}
@@ -152,6 +154,7 @@ def make_answer_vocab(answers):
 		# print i, ans_freq
 		ans = ans_freq[1]
 		answer_vocab[ans] = i
+
 
 	answer_vocab['UNK'] = top_n - 1
 	return answer_vocab
@@ -166,7 +169,7 @@ def make_questions_vocab(questions, answers, answer_vocab):
 		ans = answers[i]['multiple_choice_answer']
 		count = 0
 		if ans in answer_vocab:
-			question_words = re.findall(word_regex, question['question'])
+			question_words = re.findall(word_regex, question['question'])#e.g. question_words = ['who','is','he']
 			for qw in question_words:
 				if qw in question_frequency:
 					question_frequency[qw] += 1
@@ -193,8 +196,8 @@ def make_questions_vocab(questions, answers, answer_vocab):
 			break
 
 	qw_vocab['UNK'] = len(qw_vocab) + 1
-
-	return qw_vocab, max_question_length
+	print(max_question_length)
+	return qw_vocab, max_question_length#qw_vocab = {'who':1,'he':2....}
 
 
 def load_fc7_features(data_dir, split):

@@ -24,7 +24,6 @@ def main():
 
 
 	args = parser.parse_args()
-	#print(args.model_path)
 	vgg_file = open(args.model_path,'rb')
 	vgg16raw = vgg_file.read()
 	vgg_file.close()
@@ -40,8 +39,6 @@ def main():
 	for opn in graph.get_operations():
 		print("Name", opn.name, list(opn.values()))
         
-	#Loading data
-# 	data_loader.prepare_training_data(version = 2, data_dir = 'Data')
 	all_data = data_loader.load_questions_answers()
 	print(args)
 	if args.split == "train":
@@ -70,15 +67,19 @@ def main():
 			if idx >= len(image_id_list):
 				break
 			image_file = join(args.data_dir, '%s2015/abstract_v002_%s2015_%.12d.png'%(args.split, args.split, image_id_list[idx]))
-			image_batch[i,:,:,:] = utils.load_image_array(image_file)[:,:,:3]
+			image_batch[i,:,:,:] = utils.load_image_array(image_file)[:,:,:3]#
 			idx += 1
 			count += 1
 		
 		
 		feed_dict  = { images : image_batch[0:count,:,:,:] }
 		fc7_tensor = graph.get_tensor_by_name("import/Relu_1:0")
+
 		fc7_batch = sess.run(fc7_tensor, feed_dict = feed_dict)
-		fc7[(idx - count):idx, :] = fc7_batch[0:count,:]
+		print(fc7_batch.shape)
+		ret = np.linalg.norm(fc7_batch, ord=None, axis=1).reshape((10,1))
+		print(ret.shape)
+		fc7[(idx - count):idx, :] = fc7_batch[0:count,:] / ret
 		end = time.clock()
 		print("Time for batch 10 photos", end - start)
 		print("Hours For Whole Dataset" , (len(image_id_list) * 1.0)*(end - start)/60.0/60.0/10.0)

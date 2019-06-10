@@ -4,7 +4,7 @@ import data_loader
 import argparse
 import numpy as np
 
-def main():
+def main(modelpath = None):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--num_lstm_layers', type=int, default=2,
                        help='num_lstm_layers')
@@ -28,27 +28,28 @@ def main():
                        help='Expochs')
 	parser.add_argument('--debug', type=bool, default=False,
                        help='Debug')
-	parser.add_argument('--model_path', type=str, default = 'Data/Models/model199.ckpt',
+	parser.add_argument('--model_path', type=str, default = 'Data/Models/model49.ckpt',
                        help='Model Path')
 	parser.add_argument('--version', type=int, default=2,
                        help='VQA data version')
-
+	parser.add_argument('--lstm_direc', type=str, default='uni',
+                       help='LSTM Direction')
+    
 	args = parser.parse_args()
 	print("Reading QA DATA")
-	# qa_data = data_loader.load_questions_answers(args)
-	qa_data = data_loader.load_questions_answers(args.version, args.data_dir)
 
+	qa_data = data_loader.load_questions_answers(args.version, args.data_dir)
 	print("Reading fc7 features")
 	fc7_features, image_id_list = data_loader.load_fc7_features(args.data_dir, 'val')
-	print("FC7 features", fc7_features.shape)
-	print("image_id_list", image_id_list.shape)
+
 
 	image_id_map = {}
 	for i in range(len(image_id_list)):
 		image_id_map[ image_id_list[i] ] = i
 
 	ans_map = { qa_data['answer_vocab'][ans] : ans for ans in qa_data['answer_vocab']}
-
+	
+    
 	model_options = {
 		'num_lstm_layers' : args.num_lstm_layers,
 		'rnn_size' : args.rnn_size,
@@ -58,7 +59,8 @@ def main():
 		'fc7_feature_length' : args.fc7_feature_length,
 		'lstm_steps' : qa_data['max_question_length'] + 1,
 		'q_vocab_size' : len(qa_data['question_vocab']),
-		'ans_vocab_size' : len(qa_data['answer_vocab'])
+		'ans_vocab_size' : len(qa_data['answer_vocab']),
+		'lstm_direc' : args.lstm_direc
 	}
 	
 	
@@ -70,8 +72,11 @@ def main():
 
 	avg_accuracy = 0.0
 	total = 0
-	saver.restore(sess, args.model_path)
-	
+	if modelpath == None:
+		saver.restore(sess, args.model_path)
+	else:
+		saver.restore(sess, modelpath)        
+
 	batch_no = 0
 	while (batch_no*args.batch_size) < len(qa_data['validation']):
 		sentence, answer, fc7 = get_batch(batch_no, args.batch_size, 
@@ -93,8 +98,10 @@ def main():
 		print("Acc", accuracy)
 		avg_accuracy += accuracy
 		total += 1
-	
-	print("Acc", avg_accuracy/total)
+	sess.close()
+	Acctotal = avg_accuracy/total
+	print("Acctotal", Acctotal)
+
 
 
 def get_batch(batch_no, batch_size, fc7_features, image_id_map, qa_data, split):
@@ -121,6 +128,9 @@ def get_batch(batch_no, batch_size, fc7_features, image_id_map, qa_data, split):
 		count += 1
 	
 	return sentence, answer, fc7
+
+def early_stop(modelpath):
+	main(modelpath)
 
 if __name__ == '__main__':
 	main()
