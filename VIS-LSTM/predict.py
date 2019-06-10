@@ -33,7 +33,8 @@ def main():
                        help='Data directory')
 	parser.add_argument('--question', type=str, default='Which animal is this?',
                        help='Question')
-	
+	parser.add_argument('--lstm_direc', type=str, default='uni',
+                       help='LSTM Direction')
 	
 
 	args = parser.parse_args()
@@ -60,17 +61,18 @@ def main():
 
 	#preparing model
 	model_options = {
-        'num_lstm_layers' : args.num_lstm_layers,
-        'rnn_size' : args.rnn_size,
-        'embedding_size' : args.embedding_size,
-        'word_emb_dropout' : args.word_emb_dropout,
-        'image_dropout' : args.image_dropout,
-        'fc7_feature_length' : args.fc7_feature_length,
-        'lstm_steps' : vocab_data['max_question_length'] + 1,
-        'q_vocab_size' : len(vocab_data['question_vocab']),
-        'ans_vocab_size' : len(vocab_data['answer_vocab'])
-    }
-	#dont know what is doing
+		'num_lstm_layers' : args.num_lstm_layers,
+		'rnn_size' : args.rnn_size,
+		'embedding_size' : args.embedding_size,
+		'word_emb_dropout' : args.word_emb_dropout,
+		'image_dropout' : args.image_dropout,
+		'fc7_feature_length' : args.fc7_feature_length,
+		'lstm_steps' : vocab_data['max_question_length'] + 1,
+		'q_vocab_size' : len(vocab_data['question_vocab']),
+		'ans_vocab_size' : len(vocab_data['answer_vocab']),
+		'lstm_direc' : args.lstm_direc
+	}
+	#resume model
 	model = vis_lstm_model.Vis_lstm_model(model_options)
 	input_tensors, t_prediction, t_ans_probab = model.build_generator()
 	sess = tf.InteractiveSession()
@@ -89,6 +91,7 @@ def main():
 	answer_probab_tuples = [(-answer_probab[0][idx], idx) for idx in range(len(answer_probab[0]))]
 	answer_probab_tuples.sort()
 	print("Top Answers")
+	sess.close()
 	for i in range(5):
 		print(ans_map[ answer_probab_tuples[i][1] ])
 

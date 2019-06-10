@@ -129,7 +129,7 @@ def get_batch(batch_no, batch_size, fc7_features, image_id_map, qa_data, split):
 	
 	return sentence, answer, fc7
 
-def early_stop(modelpath):
+def perform_value(modelpath):
 	main(modelpath)
 
 if __name__ == '__main__':
