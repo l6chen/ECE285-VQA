@@ -21,6 +21,7 @@ This is a Tensorflow implementation of the LSTM + CNN + SANs model from the pape
 ```
 1. Unzip Model19.zip file in Data/Models.
 2. Download train images of which the download links are written in the file under Data/.
+3. Download val images, or upload your own test images.
 ```
 
 - Question and Answers pre-processing:
