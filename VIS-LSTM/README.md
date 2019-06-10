@@ -23,6 +23,15 @@ demo.ipynb         -- record training process
 - You have to download the [pretrained VGG-16 tensorflow model][4] using `Data/download_models.sh`.
 
 ## Usage
+
+- Preparation:
+```
+1. Unzip model49.ckpt.zip and model49.ckpt.z01 in Data/Models.
+2. Download pretrained VGG16 Network, using download link written in the download_models.sh file under Data/.
+3. Download train images of which the download links are written in the download_data.sh file under Data/.
+4. Download val images using download_test.sh, or upload your own test images.
+```
+
 - Question and Answers pre-processing:
 ```
 python data_loader.py
