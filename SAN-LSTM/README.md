@@ -1,4 +1,4 @@
-# Visual Question Answering in Tensorflow
+# Visual Question Answering with SANs model in Tensorflow
 
 
 This is a Tensorflow implementation of the LSTM + CNN + SANs model from the paper [Stacked Attention Networks for Image Question Answering][1]
@@ -48,13 +48,13 @@ python extract_cnn7.py --split=val
   * run `python evaluate.py` with the same options as that in train.py, if not the defaults.
 
 ## Implementation Details
-- cnn7 maxpool layer features (7x7x512) from the pretrained VGG-16 model are used for image embeddings.
+- Cnn7 maxpool layer features (7x7x512) from the pretrained VGG-16 model are used for image embeddings.
 - Questions are zero padded for fixed length questions, so that batch training may be used. Questions are represented as word indices of a question word vocabulary built during pre processing.
 - Answers are mapped to 1000 word vocabulary, covering 87% answers across training and validation datasets.
 - The SANs model is defined in vis_lstm.py. The input tensors for training are fc7 features, Questions(Word indices upto 22 words), Answers(one hot encoding vector of size 1000). The model depicted in the figure is implemented with 2 LSTM layers by default(num_layers in configurable).
 
 ## Results
-The model achieved an accuray of 55.6% on the validation dataset after 50 epochs of training across the entire training dataset.
+The model achieved an accuray of 55.6% on the validation dataset after 43 epochs of training across the entire training dataset.
 
 
 ## References
