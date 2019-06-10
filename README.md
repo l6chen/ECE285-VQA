@@ -1,6 +1,6 @@
 # ECE285-VQA
 ## Description
-======================= 
+=======================
 This is a visual question answering in tensorflow by team RONGZICHEN SONG composed of 
 
 *Rongzichen Song (A53284665)<br>*
