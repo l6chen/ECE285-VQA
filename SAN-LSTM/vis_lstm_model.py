@@ -19,10 +19,6 @@ class Vis_lstm_model:
             self.bimg = self.init_bias(options['embedding_size'], name = 'bimg')
             
             #Initialize model
-#           self.lstm = tf.nn.rnn_cell.BasicLSTMCell(num_units = options['rnn_size'],
-#                                                      dtype = tf.float32, 
-#                                                      name = 'lstm')
-            num_units = [options['rnn_size']] * options['lstm_steps']
             self.lstm = tf.contrib.cudnn_rnn.CudnnLSTM(num_layers = 2,
                                                         num_units = 512,
                                                         input_mode='linear_input',
@@ -34,9 +30,6 @@ class Vis_lstm_model:
                                                         bias_initializer=None,
                                                         name='lstm'
                                                     ) 
-#           cells = [tf.nn.rnn_cell.LSTMCell(num_units=n) for n in num_units]
-
-#           self.lstm = tf.nn.rnn_cell.MultiRNNCell(cells)
             
             self.ans_sm_W = self.init_weight(options['rnn_size'], options['ans_vocab_size'], name = 'ans_sm_W')
             self.ans_sm_b = self.init_bias(options['ans_vocab_size'], name = 'ans_sm_b')
@@ -100,7 +93,7 @@ class Vis_lstm_model:
                 else:
                     lstm_preactive = tf.matmul(h[lstm_step-1], self.lstm_U[l]) + tf.matmul(x[lstm_step], self.lstm_W[l]) + self.lstm_b[l]
                 
-                #把tensor -> sub-tensor：https://www.tensorflow.org/api_docs/python/tf/split
+                #sub-tensor：https://www.tensorflow.org/api_docs/python/tf/split
                 i, f, o, new_c = tf.split(lstm_preactive, num_or_size_splits = 4, axis = 1) 
                 i = tf.nn.sigmoid(i)
                 f = tf.nn.sigmoid(f)
@@ -122,33 +115,6 @@ class Vis_lstm_model:
 
         return output
 
-
-
-
-
-
-#     def forward_pass_lstm(self, word_embeddings):
-
-#         x = tf.stack(word_embeddings,0)
-#         #print(x.shape)
-# #       for i in range(self.options['lstm_steps']):
-# #           if i == 0:
-# #               outputs, state = tf.nn.dynamic_rnn(cell=self.lstm,
-# #                                                    inputs=x,
-# #                                                    dtype=tf.float32,time_major=True)
-# #           else:
-# #               outputs, state = tf.nn.dynamic_rnn(cell=self.lstm,
-# #                                                    inputs=outputs,
-# #                                                    initial_state=state,
-# #                                                    dtype=tf.float32,time_major=True)                
-#         outputs = self.lstm(x)
-#         print(len(outputs))
-#         print(outputs)
-#         #assert outputs is int
-#         return outputs[0]
-
-
-
     def build_model(self):
         cnn7_features = tf.placeholder('float32',[ None, self.options['cnn7_feature_length'],49 ], name = 'cnn7')
         sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")#is a matrix[ques,512]
@@ -162,14 +128,7 @@ class Vis_lstm_model:
             
             word_embeddings.append(word_emb)
 
-        # image_embedding = tf.matmul(cnn7_features, self.Wimg) + self.bimg
-        # image_embedding = tf.nn.tanh(image_embedding)
-        # image_embedding = tf.nn.dropout(image_embedding, self.options['image_dropout'], name = "vis_features")
 
-        # Image as the last word in the lstm
-        # word_embeddings.append(image_embedding)
-#       word_embeddings = tf.convert_to_tensor(word_embeddings)
-#       print(word_embeddings.shape)
         word_embeddings = tf.stack(word_embeddings,0)
         lstm_output = self.forward_pass_lstm(word_embeddings)
         lstm_answer = lstm_output[-1]
@@ -200,8 +159,7 @@ class Vis_lstm_model:
         return input_tensors, loss, accuracy, predictions
     
     def build_generator(self,batch):
-#         cnn7_features = tf.placeholder('float32',[ None, self.options['cnn7_feature_length'] ], name = 'cnn7')
-#         sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")
+
         cnn7_features = tf.placeholder('float32',[ None, self.options['cnn7_feature_length'],49 ], name = 'cnn7')
         sentence = tf.placeholder('int32',[None, self.options['lstm_steps'] - 1], name = "sentence")#is a matrix[ques,512]
 
@@ -210,10 +168,7 @@ class Vis_lstm_model:
             word_emb = tf.nn.embedding_lookup(self.Wemb, sentence[:,i])
             word_embeddings.append(word_emb)
 
-#         image_embedding = tf.matmul(cnn7_features, self.Wimg) + self.bimg
-#         image_embedding = tf.nn.tanh(image_embedding)
 
-#         word_embeddings.append(image_embedding)
         lstm_output = self.forward_pass_lstm(word_embeddings)
         lstm_answer = lstm_output[-1]
         
