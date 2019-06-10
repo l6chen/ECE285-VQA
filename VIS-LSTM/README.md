@@ -6,7 +6,7 @@ by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slight
 ![Model architecture](http://i.imgur.com/Jvixx2W.jpg)
 
 ## Code Organization
-
+```
 data_loader.py     -- codes for question & answer extraction and pre-processing
 extract_fc7.py     -- codes for images extraction and pre-processing
 train.py           -- codes for training
@@ -15,17 +15,18 @@ evaluate.py        -- codes for evaluation
 utils.py           -- codes for reading image file and extract image features
 vis_lstm_model.py  -- codes for vis_lstm model
 demo.ipynb         -- perform demo for training, predicting and evaluation
+```
 
 ## Datasets
 - Download the [VQA][3] train+val images, questions and answers using `Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
 - Download the [pretrained VGG-16 tensorflow model][4] using `Data/download_models.sh`.
 
 ## Usage
-
 - Question and Answers pre-processing:
 ```
 python data_loader.py
 ```
+
 - Extract the fc-7 image features using:
 ```
 python extract_fc7.py --split=train
@@ -45,6 +46,7 @@ python extract_fc7.py --split=val
     - `word_emb_dropout`: Dropout for word embeddings. Default is 0.5.
     - `data_dir`: Directory containing the data h5 files. Default is `Data/`.
     - `lstm_direc`: The direction of LSTM, unidirectional or bidirection, it can be `uni` or `bi`. Default is `uni`.
+    
 - <b>Prediction</b>
   * ```python predict.py --image_path="sample_image.jpg" --question="What is the color of the animal shown?" --model_path = "Data/Models/model2.ckpt"```
   * Models are saved during training after each of the complete training data in ```Data/Models```. Supply the path of the trained model in ```model_path``` option.
