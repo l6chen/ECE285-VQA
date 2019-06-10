@@ -26,7 +26,7 @@ demo.ipynb         -- record training process
 
 - Preparation:
 ```
-1. Unzip model49.ckpt.zip and model49.ckpt.z01 in Data/Models.
+1. Unzip model49.ckpt.zip and model49.ckpt.z01 in Data/Models. For macos system, refer to https://superuser.com/questions/365643/how-to-unzip-split-files-on-os-x
 2. Download pretrained VGG16 Network, using download link written in the download_models.sh file under Data/.
 3. Download train images of which the download links are written in the download_data.sh file under Data/.
 4. Download val images using download_test.sh, or upload your own test images.
