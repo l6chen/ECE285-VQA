@@ -17,6 +17,12 @@ This is a Tensorflow implementation of the LSTM + CNN + SANs model from the pape
 
 ## Usage
 
+- Preparation:
+```
+1. Unzip Model19.zip file in Data/Models.
+2. Download train images of which the download links are written in the file under Data/.
+```
+
 - Question and Answers pre-processing:
 ```
 python data_loader.py
