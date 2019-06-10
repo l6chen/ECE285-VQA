@@ -5,6 +5,16 @@ This is a Tensorflow implementation of the VIS + LSTM visual question answering 
 by Mengye Ren, Ryan Kiros & Richard Zemel. The model architectures vaires slightly from the original - the image embedding is plugged into the last lstm step (after the question) instead of the first. This VIS+LSTM model is based on the github [Torch implementation of neural-VQA with Lua][2]. 
 ![Model architecture](http://i.imgur.com/Jvixx2W.jpg)
 
+## Code Organization
+
+data_loader.py     -- codes for question & answer extraction and pre-processing
+extract_fc7.py     -- codes for images extraction and pre-processing
+train.py           -- codes for training
+predict.py         -- codes for predicting
+evaluate.py        -- codes for evaluation
+utils.py           -- codes for reading image file and extract image features
+vis_lstm_model.py  -- codes for vis_lstm model
+demo.ipynb         -- perform demo for training, predicting and evaluation
 
 ## Datasets
 - Download the [VQA][3] train+val images, questions and answers using `Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
