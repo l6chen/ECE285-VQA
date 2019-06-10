@@ -1,6 +1,6 @@
 # ECE285-VQA
 ## Description
-=======================
+=======================<br>
 This is a visual question answering in tensorflow by team RONGZICHEN SONG composed of 
 
 *Rongzichen Song (A53284665)<br>*
@@ -11,7 +11,7 @@ This is a visual question answering in tensorflow by team RONGZICHEN SONG compos
 This project includes two models: VIS-LSTM and SAN-LSTM, as depicted with more details in the folder named by the models' names.
 
 ## Requirements
-=======================
+=======================<br>
 - Python 3.6+
 - [Tensorflow 1.10+][1]
 - [h5py][2]
@@ -23,7 +23,7 @@ $ pip install tensorflow
 ```
 
 ## Code organization
-=======================   
+=======================<br>   
 Since we implemented two models, the detail will be illustrated in each folder's README file.
 
 
