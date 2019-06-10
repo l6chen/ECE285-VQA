@@ -20,7 +20,7 @@ This is a Tensorflow implementation of the LSTM + CNN + SANs model from the pape
 - Preparation:
 ```
 1. Unzip Model19.zip file in Data/Models.
-2. Download pretrain VGG16 Network, using download link written in the download_models.sh file under Data/.
+2. Download pretrained VGG16 Network, using download link written in the download_models.sh file under Data/.
 3. Download train images of which the download links are written in the download_data.sh file under Data/.
 4. Download val images using download_test.sh, or upload your own test images.
 ```
