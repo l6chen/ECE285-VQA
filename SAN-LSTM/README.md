@@ -2,7 +2,7 @@
 
 
 This is a Tensorflow implementation of the LSTM + CNN + SANs model from the paper [Stacked Attention Networks for Image Question Answering][1]
-. This VIS+LSTM model is based on the github [Torch implementation of neural-VQA with Lua][2]. 
+. This LSTM + CNN + SANs model is based on the github [Torch implementation of neural-VQA with Lua][2]. 
 
 
 ## Requirements
