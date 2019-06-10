@@ -1,6 +1,6 @@
 # ECE285-VQA
 ## Description
-=======================
+======================= 
 This is a visual question answering in tensorflow by team RONGZICHEN SONG composed of 
 
 *Rongzichen Song (A53284665)<br>*
@@ -23,7 +23,7 @@ $ pip install tensorflow
 ```
 
 ## Code organization
-=======================.   
+=======================   
 Since we implemented two models, the detail will be illustrated in each folder's README file.
 
 
