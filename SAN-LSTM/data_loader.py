@@ -24,13 +24,6 @@ def prepare_training_data(version = 2, data_dir = 'Data'):
 		qa_data_file = join(data_dir, 'qa_data_file2.pkl')
 		vocab_file = join(data_dir, 'vocab_file2.pkl')
 
-	# IF ALREADY EXTRACTED
-	# qa_data_file = join(data_dir, 'qa_data_file{}.pkl'.format(version))
-# 	if isfile(qa_data_file):
-# 		return
-# 		with open(qa_data_file) as f:
-# 			data = pickle.load(f)
-# 			return data
 
 	print("Loading Training questions")
 	with open(t_q_json_file) as f:
@@ -130,8 +123,7 @@ def get_question_answer_vocab(version = 2, data_dir = 'Data'):
 		with open(vocab_file,'rb') as f:
 			vocab_data = pickle.load(f)
 			return vocab_data
-# 	vocab_data = pickle.load(open(vocab_file,'tb'))
-# 	return vocab_data
+
 
 def make_answer_vocab(answers):
 	top_n = 1000
