@@ -41,7 +41,7 @@ python extract_cnn7.py --split=val
     - `data_dir`: Directory containing the data h5 files. Default is `Data/`.
 
 - <b>Prediction</b>
-  * ```python predict.py --image_path="sample_image.jpg" --question="What is the color of the animal shown?" --model_path = "Data/Models/model2.ckpt"```
+  * ```python predict.py --image_path="sample_image.jpg" --question="What is the color of the animal shown?" --model_path = "Data/Models/mode43.ckpt"```
   * Models are saved during training after each of the complete training data in ```Data/Models```. Supply the path of the trained model in ```model_path``` option.
   
 - <b>Evaluation</b>
