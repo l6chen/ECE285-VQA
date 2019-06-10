@@ -22,7 +22,7 @@ $ pip install tensorflow
 ```
 
 ## Code organization
-=======================
+=======================.   
 Since we implemented two models, the detail will be illustrated in each folder's README file.
 
 
