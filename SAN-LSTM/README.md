@@ -51,7 +51,7 @@ python extract_cnn7.py --split=val
 - Cnn7 maxpool layer features (7x7x512) from the pretrained VGG-16 model are used for image embeddings.
 - Questions are zero padded for fixed length questions, so that batch training may be used. Questions are represented as word indices of a question word vocabulary built during pre processing.
 - Answers are mapped to 1000 word vocabulary, covering 87% answers across training and validation datasets.
-- The SANs model is defined in vis_lstm.py. The input tensors for training are fc7 features, Questions(Word indices upto 22 words), Answers(one hot encoding vector of size 1000). The model depicted in the figure is implemented with 2 LSTM layers by default(num_layers in configurable).
+- The SANs model is defined in vis_lstm_model.py. The input tensors for training are cnn7 features, Questions(Word indices upto 22 words), Answers(one hot encoding vector of size 1000). The model depicted in the figure is implemented with 2 LSTM layers by default(num_layers in configurable).
 
 ## Results
 The model achieved an accuray of 55.6% on the validation dataset after 43 epochs of training across the entire training dataset.
