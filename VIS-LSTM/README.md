@@ -19,8 +19,8 @@ train.ipynb        -- record training process
 ```
 
 ## Datasets
-- You have to download the [VQA][3] train+val images, questions and answers using `Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
-- You have to download the [pretrained VGG-16 tensorflow model][4] using `Data/download_models.sh`.
+- You have to download the [VQA][3] train+val images, questions and answers by `sh Data/download_data.sh`. Extract all the downloaded zip files inside the `Data` folder.
+- You have to download the [pretrained VGG-16 tensorflow model][4] by `sh Data/download_models.sh`.
 
 ## Usage
 
